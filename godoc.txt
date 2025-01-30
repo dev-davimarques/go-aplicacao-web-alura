@@ -1,0 +1,7 @@
+Através do site https://pkg.go.dev/
+    Pesquisa por postgres
+    https://pkg.go.dev/github.com/lib/pq
+
+Podemos baixar o arquivo de conexão com o banco postgres
+
+Comando: go get github.com/lib/pq

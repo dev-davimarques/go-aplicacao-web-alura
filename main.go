@@ -1,9 +1,21 @@
 package main
 
 import (
+	"database/sql"
 	"net/http"
 	"text/template"
+
+	_ "github.com/lib/pq"
 )
+
+func conectaComBancoDeDados() *sql.DB {
+	conexao := "user=postgres dbname=postgres password=12345 host=localhost sslmode=diseble"
+	db, err := sql.Open("postgres", conexao)
+	if err != nil {
+		panic(err.Error())
+	}
+	return db
+}
 
 type Produto struct {
 	Nome, Descricao string
@@ -27,6 +39,8 @@ func index(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	db := conectaComBancoDeDados()
+	defer db.Close()
 	http.HandleFunc("/", index)
 	http.ListenAndServe(":8080", nil)
 }
