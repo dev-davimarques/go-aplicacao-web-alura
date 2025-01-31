@@ -9,7 +9,7 @@ import (
 )
 
 func conectaComBancoDeDados() *sql.DB {
-	conexao := "user=postgres dbname=postgres password=12345 host=localhost sslmode=diseble"
+	conexao := "user=postgres dbname=postgres password=12345 host=localhost sslmode=disable"
 	db, err := sql.Open("postgres", conexao)
 	if err != nil {
 		panic(err.Error())
@@ -18,29 +18,48 @@ func conectaComBancoDeDados() *sql.DB {
 }
 
 type Produto struct {
+	ID              int
 	Nome, Descricao string
 	Preco           float64
 	Quantidade      int
-	EmEstoque       bool
 }
 
 var temp = template.Must(template.ParseGlob("template/*.html"))
 
 func index(w http.ResponseWriter, r *http.Request) {
 
-	produtos := []Produto{
-		{"Camiseta", "Azul, bem bonita", 39, 5, true},
-		{"Tênis", "Confortável", 89, 3, true},
-		{"Fone", "Muito bom", 59, 2, true},
-		{"Produto novo", "Muito legal", 1.99, 1, true},
+	db := conectaComBancoDeDados()
+	selectDeTodosOsProdutos, err := db.Query("select * from produtos")
+	if err != nil {
+		panic(err.Error())
+	}
+
+	p := Produto{}
+	produtos := []Produto{}
+
+	for selectDeTodosOsProdutos.Next() {
+		var id, quantidade int
+		var nome, descricao string
+		var preco float64
+
+		err = selectDeTodosOsProdutos.Scan(&id, &nome, &descricao, &preco, &quantidade)
+		if err != nil {
+			panic(err.Error())
+		}
+
+		p.Nome = nome
+		p.Descricao = descricao
+		p.Preco = preco
+		p.Quantidade = quantidade
+
+		produtos = append(produtos, p)
 	}
 
 	temp.ExecuteTemplate(w, "Index", produtos)
+	defer db.Close()
 }
 
 func main() {
-	db := conectaComBancoDeDados()
-	defer db.Close()
 	http.HandleFunc("/", index)
 	http.ListenAndServe(":8080", nil)
 }
