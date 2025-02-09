@@ -2,20 +2,11 @@ package main
 
 import (
 	"net/http"
-	"text/template"
 
-	"github.com/dev-davimarques/go-aplicacao-web-alura/models"
+	"github.com/dev-davimarques/go-aplicacao-web-alura/routes"
 )
 
-var temp = template.Must(template.ParseGlob("template/*.html"))
-
-func index(w http.ResponseWriter, r *http.Request) {
-
-	todosOsProdutos := models.BuscaTodosOsProdutos()
-	temp.ExecuteTemplate(w, "Index", todosOsProdutos)
-}
-
 func main() {
-	http.HandleFunc("/", index)
+	routes.CarregaRotas()
 	http.ListenAndServe(":8080", nil)
 }
